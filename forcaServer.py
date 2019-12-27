@@ -1,15 +1,8 @@
 import socket
 import random
+import threading
 
-words_Server = {"Frutas":['uva','maçã','laranja','banana','pera','mamão','abacate'],
-                "Animais":['macaco','gato','cachorro','galinha','cobra','tartaruga'],
-                "Cores":['azul','verde','vermelho','preto','amarelo','rosa','marrom'],
-                "Países":['brasil','italia','alemanha','inglaterra','venezuela','espanha']}
-
-address = ("localhost",20002)
-server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-server.bind(address)
-server.listen(1)
+#Função responsavel por chegar se a letra está contida na palavra
 
 def check_tentative(letter):
     
@@ -24,32 +17,18 @@ def check_tentative(letter):
             faul_letter = faul_letter + 1
     
     return (have,faul_letter)
-    
+
+#função responsavel por escolher uma palavra entre todas disponiveis para a categoria escolhida
+
 def change_word(category):
     words = words_Server[category]
     return (words[random.randrange(0,len(words))])
-        
-winner = 0
 
-print("Servidor escutando...Aguardando Usuarios")
+#função responsavel por gerenciar cada cliente threading
 
-#try:
-while True:
-    conec, client = server.accept()
-    
-    catg = conec.recv(1024)
-    catg = catg.decode()
-    word = change_word(catg)
-    print(word)
-    word_clients = []
-
-    for i in range(len(word)):
-            word_clients.append('_')
-    
-    print(word_clients)
+def manager_Client(conec,word):
     
     while True:
-        
         letter = conec.recv(2)
         letter = letter.decode()
         
@@ -63,8 +42,74 @@ while True:
         elif(right):
             print("Acerto!")
         else:
-            print("Errou!")
+            print("Errou! Passando a vez...\n")
+            break
+        
+        print(word_clients)   
+
+
+#escopo principal
+
+words_Server = {"Frutas":['uva','maçã','laranja','banana','pera','mamão','abacate','abacaxi','melão','cereja','tangerina'],
+                "Animais":['macaco','gato','cachorro','galinha','cobra','tartaruga','cabra','boi','vaca','escorpião','sapo'],
+                "Cores":['azul','verde','vermelho','preto','amarelo','rosa','marrom','roxo','branco','cinza','lilas','violeta'],
+                "Países":['brasil','italia','alemanha','inglaterra','venezuela','espanha','islandia','Noruega','Portugal','Belgica']}
+
+#criando conexão tcp
+
+address = ("localhost",20002)
+server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+server.bind(address)
+server.listen(5)
+
+print("\n--------------------------------")
+print("|------JOGO DA FORCA-----------|")
+print("--------------------------------")
+
+print("\n-> Aguardando jogadores....\n")
+
+first_iteration = True
+winner = 0
+cont_plays = 1
+cont_categories = 1
+
+print("-----------------CATEGORIAS-----------------")
+for i in words_Server:
+    print("{a} - {cat}".format(a=cont_categories,cat=i))
+    cont_categories = cont_categories + 1
+print("--------------------------------------------")
+try:
+    while True:
+        
+        conec, client = server.accept()
+        if(first_iteration):
+            conec.send('s'.encode())
             
-        conec.send((','.join(word)).encode())            
-#except:
-#    server.close()
+        print("Jogador {a} entrou no jogo...".format(a=cont_plays))
+        cont_plays = cont_plays + 1
+        
+        if(first_iteration):
+            
+            catg = conec.recv(1024)
+            catg = catg.decode()
+            word = change_word(catg)
+        
+            print(word)
+            word_clients = []
+
+            for i in range(len(word)):
+                    word_clients.append('_')
+                    
+            print(word_clients)
+            new_client = threading.Thread(target=manager_Client,args=(conec,word))
+            new_client.start()
+            
+            first_iteration = False
+        else:
+            conec.send('n'.encode())
+            new_client = threading.Thread(target=manager_Client,args=(conec,word))
+            new_client.start()
+            #conec.send((','.join(word)).encode())
+        
+except:
+    server.close()
