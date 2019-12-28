@@ -1,6 +1,7 @@
 import socket
 import random
 import threading
+import time
 
 contador = 1
 
@@ -56,8 +57,9 @@ def manager_Client(conec,word, number_player):
                 print("Errou! Passando a vez...\n")
                 contador = 1 + contador%cont_plays
                 print("Agora a vez é de ", contador)
-                conec.send('Errou'.encode())
+                conec.send('Errado '.encode())
                 first_time = True
+            conec.send(str(word_clients).encode())
             print(word_clients) 
 
 
@@ -86,6 +88,7 @@ winner = 0
 cont_plays = 0
 cont_categories = 1
 current_player = 2
+#trava = threading.allocate_lock()
 
 print("-----------------CATEGORIAS-----------------")
 for i in words_Server:
