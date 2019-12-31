@@ -3,8 +3,16 @@ import random
 import threading
 import time
 
-contador = 1
 
+def submission_Client():
+    global cont_plays
+    global ready
+    global submission
+    while cont_plays < 2:
+        print(cont_plays)
+        time.sleep(10)
+    ready = True
+    submission = False
 #Função responsavel por chegar se a letra está contida na palavra
 
 def check_tentative(letter):
@@ -32,35 +40,40 @@ def change_word(category):
 def manager_Client(conec,word, number_player):
     global contador
     global cont_plays
+    global victory
     first_time = True
-    while True:
-        if number_player == contador:
+    while not victory:
+        if ready and number_player == contador:
             if first_time:
                 conec.send("Sua vez".encode())
                 first_time = False
-            #print("jogador ", number_player, current_player)
             letter = conec.recv(2)
             letter = letter.decode()
             
-            print("---- ",letter)
+            print("Letra escolhida:",letter)
             
             right,fault_qtd = check_tentative(letter)
             
             if(fault_qtd == 0):
                 print("End Game!")
-                conec.close()
+                conec.send('vitoria'.encode() + str(word_clients).encode())
+                #conec.close()
+                victory = True
                 break
             elif(right):
                 print("Acerto!")
-                conec.send('Acertou'.encode())
+                conec.send('Acertou'.encode() + str(word_clients).encode())
             else:
                 print("Errou! Passando a vez...\n")
                 contador = 1 + contador%cont_plays
                 print("Agora a vez é de ", contador)
-                conec.send('Errado '.encode())
+                conec.send('Errado '.encode() + str(word_clients).encode())
                 first_time = True
-            conec.send(str(word_clients).encode())
+            #conec.send(str(word_clients).encode())
             print(word_clients) 
+    conec.send('derrota'.encode() + str(word_clients).encode())
+    conec.close()
+
 
 
 #escopo principal
@@ -87,7 +100,10 @@ first_iteration = True
 winner = 0
 cont_plays = 0
 cont_categories = 1
-current_player = 2
+contador = 1
+victory = False
+submission = True
+ready = False
 #trava = threading.allocate_lock()
 
 print("-----------------CATEGORIAS-----------------")
@@ -96,7 +112,8 @@ for i in words_Server:
     cont_categories = cont_categories + 1
 print("--------------------------------------------")
 try:
-    while True:
+    #submission
+    while submission:
         
         conec, client = server.accept()
         if(first_iteration):
@@ -122,6 +139,9 @@ try:
             new_client.start()
             
             first_iteration = False
+            time_submission = threading.Thread(target=submission_Client, args=())
+            time_submission.start()
+
         else:
             conec.send('n'.encode())
             new_client = threading.Thread(target=manager_Client,args=(conec,word,cont_plays))
