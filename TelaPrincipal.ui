@@ -194,88 +194,83 @@
     <widget class="QWidget" name="tela_escolha" native="true">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>40</y>
-       <width>561</width>
-       <height>411</height>
+       <x>0</x>
+       <y>20</y>
+       <width>661</width>
+       <height>491</height>
       </rect>
      </property>
      <property name="styleSheet">
       <string notr="true">background-color: rgb(114, 159, 207);</string>
      </property>
-     <widget class="QLineEdit" name="lineEdit_2">
+     <widget class="QPushButton" name="Frutas">
       <property name="geometry">
        <rect>
-        <x>120</x>
-        <y>150</y>
-        <width>55</width>
-        <height>25</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="escolha">
-      <property name="geometry">
-       <rect>
-        <x>220</x>
-        <y>150</y>
-        <width>99</width>
-        <height>25</height>
+        <x>20</x>
+        <y>120</y>
+        <width>131</width>
+        <height>71</height>
        </rect>
       </property>
       <property name="text">
-       <string>Escolher</string>
+       <string>Frutas</string>
       </property>
      </widget>
-     <widget class="QWidget" name="horizontalLayoutWidget_5">
+     <widget class="QPushButton" name="Cores">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>120</y>
+        <width>131</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Cores</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="Animais">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>120</y>
+        <width>131</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Animais</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="Paises">
+      <property name="geometry">
+       <rect>
+        <x>410</x>
+        <y>120</y>
+        <width>131</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Países</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
         <x>30</x>
         <y>50</y>
-        <width>525</width>
-        <height>80</height>
+        <width>261</width>
+        <height>51</height>
        </rect>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Escolha uma categoria</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton">
-         <property name="text">
-          <string>Frutas</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_2">
-         <property name="text">
-          <string>Cores</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_4">
-         <property name="text">
-          <string>Animais</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_5">
-         <property name="text">
-          <string>Paśes</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <property name="text">
+       <string>Escolha uma categoria</string>
+      </property>
      </widget>
     </widget>
-    <zorder>widget_3</zorder>
     <zorder>palpite</zorder>
+    <zorder>widget_3</zorder>
     <zorder>horizontalLayoutWidget_3</zorder>
     <zorder>verticalLayoutWidget</zorder>
     <zorder>tela_escolha</zorder>
@@ -319,14 +314,62 @@
    </hints>
   </connection>
   <connection>
-   <sender>escolha</sender>
+   <sender>Frutas</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>tela_escolha</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>104</x>
+     <y>174</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Paises</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>tela_escolha</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>494</x>
+     <y>174</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Animais</sender>
    <signal>clicked(bool)</signal>
    <receiver>tela_escolha</receiver>
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>364</x>
-     <y>88</y>
+     <y>174</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Cores</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>tela_escolha</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>234</x>
+     <y>174</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
