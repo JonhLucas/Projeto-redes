@@ -2,6 +2,7 @@ import socket
 import random
 import threading
 import time
+from Main import MainWindow
 
 
 def submission_Client():

@@ -5,6 +5,7 @@ address = ("localhost", 20002)
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(address)
 playing = True
+keeper = 0 #condição para leitura de dados
 
 print("Cliente ativo, fazendo requisição\n")
 
@@ -13,15 +14,11 @@ while playing:
     print('inicio de jogo')
     control = client.recv(2)
     control = control.decode()
-    keeper = 0 #condição para leitura de dados
     if(control == 's'):
         print("-> Jogador 1, informe a categoria de palavras deseja\n")
         category = input()
         client.send(category.encode())
-        print("esperando conexão de outros jogadores")
-        #time.sleep(10)
-        #message = client.recv(1024)
-        #print(message.decode())   
+        print("esperando conexão de outros jogadores")  
         
     while playing:
         if keeper:
@@ -50,12 +47,5 @@ while playing:
 	        	playing = False
 	        	client.close()
 	        print(response.decode())
-
-
-
-
-
-#except:
-#    client.close()
 	        
 	        
