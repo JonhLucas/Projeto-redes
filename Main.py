@@ -57,6 +57,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			global category
 			category = choose
 			MainWindow.Aguarde.show()
+			MainWindow.Tema.setText(choose)
 			#transicao()
 
 		sinal = Sinais()
@@ -74,7 +75,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.Frutas.clicked.connect(lambda: escolherCategoria("Frutas"))
 		self.Cores.clicked.connect(lambda: escolherCategoria("Cores"))
 		self.Animais.clicked.connect(lambda: escolherCategoria("Animais"))
-		self.Paises.clicked.connect(lambda: escolherCategoria("Paises"))
+		self.Paises.clicked.connect(lambda: escolherCategoria("Países"))
 
 
 def main(ui):
@@ -104,8 +105,11 @@ def main(ui):
 			    	ui.Aguarde.hide()
 			    	ui.tela_escolha.hide()
 
-			    i = client.recv(4096).decode()
-			    ui.label_7.setText(i) 
+			    messenge_inicial = client.recv(4096).decode()
+			    print(messenge_inicial)
+			    nova = messenge_inicial.find(']')
+			    ui.label_7.setText(messenge_inicial[0:nova+1])
+			    ui.Tema.setText(messenge_inicial[nova+1:]) 
 			    while playing:
 			        if keeper:
 			        	print('leitura liberada')
@@ -118,6 +122,8 @@ def main(ui):
 				        elif 'vitoria' in response.decode():
 				        	playing = False
 				        	print('Voce venceu!')
+				        	ui.palpite.hide()
+				        	ui.resultado.setText("Vitoria")
 				        palavra = response.decode()
 				        print(palavra)
 				        ui.label_7.setText(palavra[7:])
@@ -137,6 +143,8 @@ def main(ui):
 				        	print("voce perdeu")
 				        	playing = False
 				        	client.close()
+				        	ui.palpite.hide()
+				        	ui.resultado.setText("Derrota!")
 				        print(response.decode())
 
 

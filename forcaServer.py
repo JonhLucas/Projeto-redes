@@ -38,12 +38,15 @@ def change_word(category):
 
 #função responsavel por gerenciar cada cliente threading
 
-def manager_Client(conec,word, number_player):
+def manager_Client(conec,word, number_player, catg):
     global contador
     global cont_plays
     global victory
+    global submission
     first_time = True
-    conec.send(str(word_clients).encode())
+    conec.send(str(word_clients).encode() + catg.encode())
+    #conec.send(str(word_clients).encode())
+    #conec.send(catg.encode())
     while not victory:
         #Validacao do jogador
         if ready and number_player == contador:
@@ -60,6 +63,7 @@ def manager_Client(conec,word, number_player):
             if(fault_qtd == 0):
                 print("End Game!")
                 conec.send('vitoria'.encode() + str(word_clients).encode())
+                submission = False #lembrar de apagar
                 #conec.close()
                 victory = True
                 break
@@ -136,14 +140,15 @@ try:
             catg = catg.decode()
             word = change_word(catg)
         
-            print(word)
+            print(catg,":", word)
             word_clients = []
 
             for i in range(len(word)):
                     word_clients.append('_')
                     
             print(word_clients)
-            new_client = threading.Thread(target=manager_Client,args=(conec,word,cont_plays))
+            new_client = threading.Thread(target=manager_Client,args=(conec,word,cont_plays,catg))
+            #new_client.daemon = True
             new_client.start()
             
             first_iteration = False
@@ -152,9 +157,11 @@ try:
 
         else:
             conec.send('n'.encode())
-            new_client = threading.Thread(target=manager_Client,args=(conec,word,cont_plays))
+            new_client = threading.Thread(target=manager_Client,args=(conec,word,cont_plays,catg))
+            #new_client.daemon = True
             new_client.start()
             #conec.send((','.join(word)).encode())
-        
+    print("fechando")
+    server.close()       
 except:
     server.close()

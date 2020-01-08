@@ -151,6 +151,34 @@
      <property name="styleSheet">
       <string notr="true">background-color: rgb(233, 185, 110);</string>
      </property>
+     <widget class="QWidget" name="horizontalLayoutWidget_5">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>50</y>
+        <width>311</width>
+        <height>80</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Resultado:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="resultado">
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+      <zorder>resultado</zorder>
+      <zorder>label_8</zorder>
+     </widget>
     </widget>
     <widget class="QWidget" name="palpite" native="true">
      <property name="geometry">
