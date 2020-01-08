@@ -2,7 +2,7 @@ import socket
 import random
 import threading
 import time
-from Main import MainWindow
+
 
 
 def submission_Client():
@@ -43,7 +43,9 @@ def manager_Client(conec,word, number_player):
     global cont_plays
     global victory
     first_time = True
+    conec.send(str(word_clients).encode())
     while not victory:
+        #Validacao do jogador
         if ready and number_player == contador:
             if first_time:
                 conec.send("Sua vez".encode())
@@ -70,9 +72,14 @@ def manager_Client(conec,word, number_player):
                 print("Agora a vez é de ", contador)
                 conec.send('Errado '.encode() + str(word_clients).encode())
                 first_time = True
-            #conec.send(str(word_clients).encode())
-            print(word_clients) 
-    conec.send('derrota'.encode() + str(word_clients).encode())
+            print(word_clients)
+        elif ready and not victory:
+            time.sleep(1)
+            conec.send("update ".encode() + str(word_clients).encode())
+            #print("envio", number_player)
+
+    time.sleep(1)
+    conec.send('derrota'.encode())
     conec.close()
 
 

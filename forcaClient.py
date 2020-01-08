@@ -19,7 +19,8 @@ while playing:
         category = input()
         client.send(category.encode())
         print("esperando conexão de outros jogadores")  
-        
+       
+    print("---------------Aqui:", client.recv(4096).decode()) 
     while playing:
         if keeper:
         	print('leitura liberada')
@@ -35,17 +36,18 @@ while playing:
 	        palavra = response.decode()
 	        print(palavra)
         else:
-        	print('espere sua vez')
+        	print('espere sua vez*')
         	response = client.recv(4096)
 	        if 'Sua vez' in response.decode():
 	        	keeper = 1
 	        elif 'vitoria' in response.decode():
 	        	playing = False
 	        	client.close()
+	        elif "update" in response.decode():
+	        	print("atualização", response.decode())
 	        else:
 	        	print("voce perdeu")
 	        	playing = False
 	        	client.close()
 	        print(response.decode())
-	        
-	        
+	    #print("ok")

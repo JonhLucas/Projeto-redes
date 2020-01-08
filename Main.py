@@ -1,7 +1,14 @@
 from principal import Ui_MainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
+from Client import Client
 import threading, time, random, socket
+
+class Sinais(QtCore.QObject):
+			sinal = pyqtSignal()
+			def __init__(self):
+				QtCore.QObject.__init__(self)
+
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	"""docstring for MainWindow"""
@@ -27,25 +34,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.label_6.setText(_translate("MainWindow", "Digite uma letra"))
 		self.pushButton_3.setText(_translate("MainWindow", "Palpite"))
 		self.label_4.setText(_translate("MainWindow", "Escolha uma categoria"))
-		self.comboBox.setItemText(0, _translate("MainWindow", "Frutas"))
-		self.comboBox.setItemText(1, _translate("MainWindow", "Cores"))
-		self.comboBox.setItemText(2, _translate("MainWindow", "Animais"))
-		self.comboBox.setItemText(3, _translate("MainWindow", "Países"))
-		self.escolha.setText(_translate("MainWindow", "Escolher"))
+		self.Frutas.setText(_translate("MainWindow", "Frutas"))
+		self.Cores.setText(_translate("MainWindow", "Cores"))
+		self.Animais.setText(_translate("MainWindow", "Animais"))
+		self.Paises.setText(_translate("MainWindow", "Países"))
+		self.label_4.setText(_translate("MainWindow", "Escolha uma categoria"))
 
-		class Sinais(QtCore.QObject):
-			sinal = pyqtSignal()
-			def __init__(self):
-				QtCore.QObject.__init__(self)
 
-		sinal = Sinais()
+		def transicao():
+			def apagarAguarde():
+				time.sleep(1)
+				MainWindow.Aguarde.hide()
 
+			tarefa = threading.Thread(target = apagarAguarde)
+			tarefa.daemon = True
+			tarefa.start()
 
 		def b():
-			MainWindow.widget.setStyleSheet("background-color: #{};".format(random.randint(100000,999999)))
-
-		sinal.sinal.connect(b)
+			MainWindow.widget.setStyleSheet("background-color: #{};".format(random.randint(100000,999999))) 
 		
+		def escolherCategoria(choose):
+			global category
+			category = choose
+			MainWindow.Aguarde.show()
+			#transicao()
+
+		sinal = Sinais()
+		sinal.sinal.connect(b)
 		def changeColor():
 			while True:
 				time.sleep(1)
@@ -54,21 +69,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		tarefa = threading.Thread(target=changeColor)
 		tarefa.daemon = True
 		tarefa.start()
+		#conexões
+		self.criar.clicked.connect(transicao)
+		self.Frutas.clicked.connect(lambda: escolherCategoria("Frutas"))
+		self.Cores.clicked.connect(lambda: escolherCategoria("Cores"))
+		self.Animais.clicked.connect(lambda: escolherCategoria("Animais"))
+		self.Paises.clicked.connect(lambda: escolherCategoria("Paises"))
 
 
 def main(ui):
 
-	def escolherCategoria():
-		category = ui.lineEdit_2.text()
-		print("Texto:", category)
-
 	def a():
-		
-		def create_socket():
-			def oi():
-				print("Hello")
 
-			category = ""
+		def create_socket():
 			address = ("localhost", 20002)
 			client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			client.connect(address)
@@ -82,16 +95,17 @@ def main(ui):
 			    control = control.decode()
 			    if(control == 's'):
 			        print("-> Jogador 1, informe a categoria de palavras deseja\n")
-			        while category == "":
-			        	time.sleep(10)
-			        	category = ui.lineEdit_2.text()
-			        	print(ui.lineEdit_2.text(), ui.comboBox.currentText())
-			        print("Saiu do loop")
+			        while category == "inicial":
+			        	time.sleep(1)
 			        client.send(category.encode())
 			        print("esperando conexão de outros jogadores")
+			        ui.Aguarde.hide()
 			    else:
-			    	ui.tela_escolha  
-			        
+			    	ui.Aguarde.hide()
+			    	ui.tela_escolha.hide()
+
+			    i = client.recv(4096).decode()
+			    ui.label_7.setText(i) 
 			    while playing:
 			        if keeper:
 			        	print('leitura liberada')
@@ -106,14 +120,19 @@ def main(ui):
 				        	print('Voce venceu!')
 				        palavra = response.decode()
 				        print(palavra)
+				        ui.label_7.setText(palavra[7:])
 			        else:
 			        	print('espere sua vez')
 			        	response = client.recv(4096)
+			        	palavra = response.decode()
 				        if 'Sua vez' in response.decode():
 				        	keeper = 1
 				        elif 'vitoria' in response.decode():
 				        	playing = False
 				        	client.close()
+				        elif 'update' in response.decode():
+				        	print("atualização:", response.decode())
+				        	ui.label_7.setText(palavra[7:])
 				        else:
 				        	print("voce perdeu")
 				        	playing = False
@@ -121,8 +140,6 @@ def main(ui):
 				        print(response.decode())
 
 
-		#print("1----- ",ui.lineEdit_2.text())
-		#ui.label_2.setText("olafasdf sadf a")
 		tarefa_principal = threading.Thread(target=create_socket)
 		tarefa_principal.daemon = True
 		tarefa_principal.start()
@@ -130,6 +147,9 @@ def main(ui):
 	ui.criar.clicked.connect(a)
 
 
+
+response = "Valor inicial"
+category = "inicial"
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
