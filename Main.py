@@ -1,7 +1,6 @@
 from principal import Ui_MainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
-from Client import Client
 import threading, time, random, socket
 
 class Sinais(QtCore.QObject):
