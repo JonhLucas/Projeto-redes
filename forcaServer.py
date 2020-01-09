@@ -22,13 +22,13 @@ def check_tentative(letter):
     faul_letter = 0
 
     for i in range(len(word)):
-        if (word[i] == letter):
+        if word[i] == letter:
             word_clients[i] = letter
             have = True
-        if (word_clients[i] == '_'):
+        if word_clients[i] == '_':
             faul_letter = faul_letter + 1
 
-    return (have, faul_letter)
+    return have, faul_letter
 
 
 # função responsavel por escolher uma palavra entre todas disponiveis para a categoria escolhida
@@ -45,9 +45,10 @@ def manager_Client(conec, word, number_player, catg):
     global cont_plays
     global victory
     global submission
-    global palpites
+    global guesses
     first_time = True
-    conec.send(str(word_clients).encode() + catg.encode())
+    #messagem inicial
+    conec.send(str(word_clients).encode() + "#".encode() + catg.encode())
     while not victory:
         # Validacao do jogador
         if ready and number_player == contador:
@@ -58,31 +59,31 @@ def manager_Client(conec, word, number_player, catg):
             letter = letter.decode()
 
             print("Letra escolhida:", letter)
-            palpites.append(letter)
-            print(str(palpites))
+            guesses.append(letter)
+            print(str(guesses))
 
             right, fault_qtd = check_tentative(letter)
 
             if (fault_qtd == 0):
                 print("End Game!")
-                conec.send('vitoria'.encode() + str(word_clients).encode() + "#palpite".encode() + str(palpites).encode())
+                conec.send('vitoria:'.encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
                 submission = False  # lembrar de apagar
                 # conec.close()
                 victory = True
                 break
             elif (right):
                 print("Acerto!")
-                conec.send('Acertou'.encode() + str(word_clients).encode() + "#palpite".encode() + str(palpites).encode())
+                conec.send('Acertou:'.encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
             else:
                 print("Errou! Passando a vez...\n")
                 contador = 1 + contador % cont_plays
                 print("Agora a vez é de ", contador)
-                conec.send('Errado '.encode() + str(word_clients).encode() + "#palpite".encode() + str(palpites).encode())
+                conec.send('Errado:'.encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
                 first_time = True
             print(word_clients)
         elif ready and not victory:
             time.sleep(1)
-            conec.send("update ".encode() + str(word_clients).encode() + "#palpite".encode() + str(palpites).encode())
+            conec.send("update:".encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
 
     time.sleep(1)
     conec.send('derrota'.encode())
@@ -121,7 +122,7 @@ contador = 1
 victory = False
 submission = True
 ready = False
-palpites = []
+guesses = []
 # trava = threading.allocate_lock()
 
 print("-----------------CATEGORIAS-----------------")

@@ -122,41 +122,41 @@ def main(ui):
                 else:
                     ui.Aguarde.hide()
                     ui.tela_escolha.hide()
-
-                messenge_inicial = client.recv(4096).decode()
-                print(messenge_inicial)
-                nova = messenge_inicial.find(']')
-                ui.label_7.setText(messenge_inicial[0:nova + 1])
-                ui.Tema.setText(messenge_inicial[nova + 1:])
+                #messagem inicial
+                messenge_inicial = client.recv(4096).decode().split('#')
+                ui.label_7.setText(messenge_inicial[0])
+                ui.Tema.setText(messenge_inicial[1])
                 while playing:
                     if keeper:
                         print('leitura liberada')
                         letter = input('Uma letra: ')
                         letter = letter.encode()
                         client.send(letter)
-                        response = client.recv(4096)
-                        if 'Errado ' in response.decode():
+                        response = client.recv(4096).decode().split("#")
+                        palavra = response[1].split(":")
+                        status = response[0].split(":")
+                        if 'Errado' in status[0]:
                             keeper = 0
-                        elif 'vitoria' in response.decode():
+                        elif 'vitoria' in status[0]:
                             playing = False
                             print('Voce venceu!')
                             ui.palpite.hide()
                             ui.resultado.setText("Vitoria")
-                        palavra = response.decode().split("#")
-                        print(palavra[0])
-                        ui.label_7.setText(palavra[0][7:])
+                        print(response[0], response[1])
+                        ui.label_7.setText(status[1])
                     else:
                         print('espere sua vez')
                         response = client.recv(4096)
                         palavra = response.decode().split("#")
-                        if 'Sua vez' in response.decode():
+                        status = palavra[0].split(":")
+                        if 'Sua vez' in status[0]:
                             keeper = 1
-                        elif 'vitoria' in response.decode():
+                        elif 'vitoria' in status[0]:
                             playing = False
                             client.close()
-                        elif 'update' in response.decode():
-                            print("atualização:", palavra[0])
-                            ui.label_7.setText(palavra[0][7:])
+                        elif 'update' in status[0]:
+                            #print("atualização:", palavra[0])
+                            ui.label_7.setText(status[1])
                         else:
                             print("voce perdeu")
                             playing = False
