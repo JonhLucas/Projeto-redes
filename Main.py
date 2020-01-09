@@ -36,11 +36,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.Animais.setText(_translate("MainWindow", "Animais"))
         self.Paises.setText(_translate("MainWindow", "Países"))
         self.label_4.setText(_translate("MainWindow", "Escolha uma categoria"))
+        self.progressBar.setValue(0)
 
-        def transicao():
+        def transition():
             def endWaiting():
                 time.sleep(1)
                 MainWindow.Aguarde.hide()
+
+            tarefa = threading.Thread(target=endWaiting)
+            tarefa.daemon = True
+            tarefa.start()
+
+        def progress():
+            def endWaiting():
+                complete = int(0)
+                while complete < 100:
+                    complete += 1
+                    # time.sleep(0.1)
+                    MainWindow.progressBar.setValue(complete)
 
             tarefa = threading.Thread(target=endWaiting)
             tarefa.daemon = True
@@ -55,6 +68,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             MainWindow.Aguarde.show()
             MainWindow.Tema.setText(choice)
             # transicao()
+            #progress()
 
         sinal = Sinais()
         sinal.sinal.connect(changeBackground)
@@ -68,7 +82,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         task.daemon = True
         task.start()
         # conexões
-        self.criar.clicked.connect(transicao)
+        self.criar.clicked.connect(progress)
+        self.criar.clicked.connect(transition)
         self.Frutas.clicked.connect(lambda: chooseCategory("Frutas"))
         self.Cores.clicked.connect(lambda: chooseCategory("Cores"))
         self.Animais.clicked.connect(lambda: chooseCategory("Animais"))
@@ -90,6 +105,7 @@ def main(ui):
             client.connect(address)
             playing = True
             keeper = 0  # condição para leitura de dados
+            guesses = []
             print("Cliente ativo, fazendo requisição\n")
             # try:
             while playing:
@@ -126,21 +142,21 @@ def main(ui):
                             print('Voce venceu!')
                             ui.palpite.hide()
                             ui.resultado.setText("Vitoria")
-                        palavra = response.decode()
-                        print(palavra)
-                        ui.label_7.setText(palavra[7:])
+                        palavra = response.decode().split("#")
+                        print(palavra[0])
+                        ui.label_7.setText(palavra[0][7:])
                     else:
                         print('espere sua vez')
                         response = client.recv(4096)
-                        palavra = response.decode()
+                        palavra = response.decode().split("#")
                         if 'Sua vez' in response.decode():
                             keeper = 1
                         elif 'vitoria' in response.decode():
                             playing = False
                             client.close()
                         elif 'update' in response.decode():
-                            print("atualização:", response.decode())
-                            ui.label_7.setText(palavra[7:])
+                            print("atualização:", palavra[0])
+                            ui.label_7.setText(palavra[0][7:])
                         else:
                             print("voce perdeu")
                             playing = False
@@ -151,8 +167,6 @@ def main(ui):
 
         tarefa_principal = threading.Thread(target=create_socket)
         tarefa_principal.start()
-        #print(ui.lineEdit.text())
-        #lambda: chooseCategory("Cores")
 
     ui.criar.clicked.connect(createRoom)
 
