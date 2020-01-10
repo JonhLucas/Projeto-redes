@@ -53,7 +53,7 @@ def manager_Client(conec, word, number_player, catg):
         # Validacao do jogador
         if ready and number_player == contador:
             if first_time:
-                conec.send("Sua vez".encode())
+                conec.send("Sua vez:".encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
                 first_time = False
             letter = conec.recv(2)
             letter = letter.decode()
