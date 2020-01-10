@@ -4,7 +4,7 @@ import threading
 import time
 
 
-def submission_Client():
+def submission_client():
     global cont_plays
     global ready
     global submission
@@ -13,6 +13,7 @@ def submission_Client():
         time.sleep(10)
     ready = True
     submission = False
+    print("O jogo pode começar")
 
 
 # Função responsavel por chegar se a letra está contida na palavra
@@ -40,8 +41,8 @@ def change_word(category):
 
 # função responsavel por gerenciar cada cliente threading
 
-def manager_Client(conec, word, number_player, catg):
-    global contador
+def manager_client(conec, word, number_player, catg):
+    global counter
     global cont_plays
     global victory
     global submission
@@ -51,7 +52,7 @@ def manager_Client(conec, word, number_player, catg):
     conec.send(str(word_clients).encode() + "#".encode() + catg.encode())
     while not victory:
         # Validacao do jogador
-        if ready and number_player == contador:
+        if ready and number_player == counter:
             if first_time:
                 conec.send("Sua vez:".encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
                 first_time = False
@@ -76,8 +77,8 @@ def manager_Client(conec, word, number_player, catg):
                 conec.send('Acertou:'.encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
             else:
                 print("Errou! Passando a vez...\n")
-                contador = 1 + contador % cont_plays
-                print("Agora a vez é de ", contador)
+                counter = 1 + counter % cont_plays
+                print("Agora a vez é de ", counter)
                 conec.send('Errado:'.encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
                 first_time = True
             print(word_clients)
@@ -88,6 +89,28 @@ def manager_Client(conec, word, number_player, catg):
     time.sleep(1)
     conec.send('derrota'.encode())
     conec.close()
+
+
+def manager_room(ipaddress):
+    def submit_rooms():
+        try:
+            print("Divulgação de salas")
+            i_port = 20000
+            i_address = ("localhost", i_port)
+            i_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            i_server.bind(i_address)
+            i_server.listen(5)
+            while True:
+                i_conec, i_client = i_server.accept()
+                print("Nova conexao estabelecida:", i_client)
+                i_conec.send("Sala 1*Sala 2*Sala 3#Sala 4*Sala 5".encode())
+                i_conec.close()
+        except socket.error:
+            print("Erro na conexao")
+
+    task = threading.Thread(target=submit_rooms, args=())
+    #task.daemon = True
+    task.start()
 
 
 # escopo principal
@@ -102,11 +125,13 @@ words_Server = {"Frutas": ['uva', 'maçã', 'laranja', 'banana', 'pera', 'mamão
                            'Portugal', 'Belgica']}
 
 # criando conexão tcp
-
-address = ("localhost", 20002)
+ip = "localhost"
+port = 20002
+address = (ip, port)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(address)
 server.listen(5)
+manager_room(ip)
 
 print("\n--------------------------------")
 print("|------JOGO DA FORCA-----------|")
@@ -118,7 +143,7 @@ first_iteration = True
 winner = 0
 cont_plays = 0
 cont_categories = 1
-contador = 1
+counter = 1
 victory = False
 submission = True
 ready = False
@@ -135,6 +160,7 @@ try:
     while submission:
 
         conec, client = server.accept()
+        print("conexao:", client)
         if (first_iteration):
             conec.send('s'.encode())
 
@@ -154,18 +180,17 @@ try:
                 word_clients.append('_')
 
             print(word_clients)
-            new_client = threading.Thread(target=manager_Client, args=(conec, word, cont_plays, catg))
-            # new_client.daemon = True
+            new_client = threading.Thread(target=manager_client, args=(conec, word, cont_plays, catg))
             new_client.start()
 
             first_iteration = False
-            time_submission = threading.Thread(target=submission_Client, args=())
+            time_submission = threading.Thread(target=submission_client, args=())
+            time_submission.daemon = True
             time_submission.start()
 
         else:
             conec.send('n'.encode())
-            new_client = threading.Thread(target=manager_Client, args=(conec, word, cont_plays, catg))
-            # new_client.daemon = True
+            new_client = threading.Thread(target=manager_client, args=(conec, word, cont_plays, catg))
             new_client.start()
             # conec.send((','.join(word)).encode())
     print("fechando")

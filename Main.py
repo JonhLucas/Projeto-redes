@@ -11,7 +11,6 @@ from principal import Ui_MainWindow
 
 class Sinais(QtCore.QObject):
     sinal = pyqtSignal()
-
     def __init__(self):
         QtCore.QObject.__init__(self)
 
@@ -48,15 +47,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.label_3.setText(_translate("MainWindow", "Aguarde"))
 
         self.progressBar.setValue(0)
+        self.lineEdit_3.setEnabled(False)
 
         def transition():
             def end_waiting():
                 time.sleep(1)
                 MainWindow.Aguarde.hide()
 
-            tarefa = threading.Thread(target=end_waiting)
-            tarefa.daemon = True
-            tarefa.start()
+            task_2 = threading.Thread(target=end_waiting)
+            task_2.daemon = True
+            task_2.start()
 
         def progress():
             def addition():
@@ -74,6 +74,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             category = choice
             MainWindow.Aguarde.show()
             MainWindow.Tema.setText(choice)
+
         '''def change_background():
             MainWindow.widget.setStyleSheet("background-color: #{};".format(random.randint(100000, 999999)))
 
@@ -96,10 +97,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.Animais.clicked.connect(lambda: choose_category("Animais"))
         self.Paises.clicked.connect(lambda: choose_category("Países"))
 
+    def list_room(self, ip_address):
+        try:
+            print("Entrou")
+            i_port = 20000
+            i_address = (ip_address, i_port)
+            i_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            i_client.connect(i_address)
+            rooms = i_client.recv(4096).decode().split('#')
+            available = rooms[0].split("*")
+            occupied = rooms[1].split("*")
+            #print(rooms)
+            for room in available:
+                print(room)
+                self.comboBox.addItem(room)
+            for room in occupied:
+                print(room)
+                self.comboBox_2.addItem(room)
+            print("Sair")
+        except socket.error:
+            print('erro na conexao')
+
 
 def main(mw):
     def create_room():
         def create_socket():
+            print(mw.comboBox.currentText())
             try:
                 port = int(mw.lineEdit.text())
                 print("Endereço solicitado:", port)
@@ -107,9 +130,12 @@ def main(mw):
                 port = 20002
                 print('Endereço invalido. Encaminhando para:', port)
 
-            address = ("localhost", port)
-            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client.connect(address)
+            try:
+                address = ("localhost", port)
+                client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                client.connect(address)
+            except socket.error:
+                print("Erro na conexao")
             playing = True
             keeper = 0  # condição para leitura de dados
             guesses = []
@@ -139,11 +165,13 @@ def main(mw):
                         letter = input('Uma letra: ')
                         letter = letter.encode()
                         client.send(letter)
+                        print(mw.lineEdit_3.text())
                         response = client.recv(4096).decode().split("#")
                         palavra = response[1].split(":")
                         status = response[0].split(":")
                         if 'Errado' in status[0]:
                             keeper = 0
+                            mw.lineEdit_3.setEnabled(False)
                         elif 'vitoria' in status[0]:
                             playing = False
                             print('Voce venceu!')
@@ -156,6 +184,7 @@ def main(mw):
                         response = client.recv(4096).decode()
                         if 'Sua vez' in response:
                             keeper = 1
+                            mw.lineEdit_3.setEnabled(True)
                         elif 'vitoria' in response:
                             playing = False
                             client.close()
@@ -167,7 +196,7 @@ def main(mw):
                             mw.resultado.setText("Derrota!")
                         if 'update' in response:
                             # response não pode ser alterado
-                            #duas mensagens estão sendo recebidas ao mesmo tempo, update e sua vez
+                            # duas mensagens estão sendo recebidas ao mesmo tempo, update e sua vez
                             palavra = response.split("#")
                             status = palavra[0].split(":")
                             p = palavra[1].split(":")
@@ -185,8 +214,10 @@ category = "inicial"
 if __name__ == "__main__":
     import sys
 
+    ip = "localhost"
     app = QtWidgets.QApplication(sys.argv)
     ui = MainWindow()
+    ui.list_room(ip)
     ui.show()
     main(ui)
     sys.exit(app.exec_())

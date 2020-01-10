@@ -31,7 +31,7 @@
       <rect>
        <x>130</x>
        <y>100</y>
-       <width>200</width>
+       <width>381</width>
        <height>41</height>
       </rect>
      </property>
@@ -42,6 +42,9 @@
          <string>Criar nova sala:</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBox"/>
       </item>
       <item>
        <widget class="QPushButton" name="criar">
@@ -57,7 +60,7 @@
       <rect>
        <x>130</x>
        <y>170</y>
-       <width>501</width>
+       <width>517</width>
        <height>41</height>
       </rect>
      </property>
@@ -65,12 +68,15 @@
       <item>
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Digite o código da sala que deseja entrar</string>
+         <string>Digite o código da sala</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLineEdit" name="lineEdit"/>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBox_2"/>
       </item>
       <item>
        <widget class="QPushButton" name="Entrar">
