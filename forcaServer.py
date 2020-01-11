@@ -48,13 +48,14 @@ def manager_client(conec, word, number_player, catg):
     global submission
     global guesses
     first_time = True
-    #messagem inicial
+    # messagem inicial
     conec.send(str(word_clients).encode() + "#".encode() + catg.encode())
     while not victory:
         # Validacao do jogador
         if ready and number_player == counter:
             if first_time:
-                conec.send("Sua vez:".encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
+                conec.send(
+                    "Sua vez:".encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
                 first_time = False
             letter = conec.recv(2)
             letter = letter.decode()
@@ -67,19 +68,22 @@ def manager_client(conec, word, number_player, catg):
 
             if (fault_qtd == 0):
                 print("End Game!")
-                conec.send('vitoria:'.encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
+                conec.send(
+                    'vitoria:'.encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
                 submission = False  # lembrar de apagar
                 # conec.close()
                 victory = True
                 break
             elif (right):
                 print("Acerto!")
-                conec.send('Acertou:'.encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
+                conec.send(
+                    'Acertou:'.encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
             else:
                 print("Errou! Passando a vez...\n")
                 counter = 1 + counter % cont_plays
                 print("Agora a vez é de ", counter)
-                conec.send('Errado:'.encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
+                conec.send(
+                    'Errado:'.encode() + str(word_clients).encode() + "#palpite:".encode() + str(guesses).encode())
                 first_time = True
             print(word_clients)
         elif ready and not victory:
@@ -92,9 +96,11 @@ def manager_client(conec, word, number_player, catg):
 
 
 def manager_room(ipaddress):
+    global rooms
     def submit_rooms():
         try:
             print("Divulgação de salas")
+            r = ""
             i_port = 20000
             i_address = ("localhost", i_port)
             i_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -103,13 +109,24 @@ def manager_room(ipaddress):
             while True:
                 i_conec, i_client = i_server.accept()
                 print("Nova conexao estabelecida:", i_client)
-                i_conec.send("Sala 1*Sala 2*Sala 3#Sala 4*Sala 5".encode())
+                for e in rooms:
+                    if rooms[e] == True:
+                        r = r + str(e) + '*'
+                r = r + "#"
+                for e in rooms:
+                    if not rooms[e]:
+                        r = r + str(e) + '*'
+                i_conec.send(r.encode())
+                #print(r)
+                r = ""
+                devolvido = i_conec.recv(4096).decode()
+                print("Devolvido:", devolvido)
+                rooms[int(devolvido)] = False
                 i_conec.close()
         except socket.error:
             print("Erro na conexao")
 
     task = threading.Thread(target=submit_rooms, args=())
-    #task.daemon = True
     task.start()
 
 
@@ -123,15 +140,18 @@ words_Server = {"Frutas": ['uva', 'maçã', 'laranja', 'banana', 'pera', 'mamão
                           'lilas', 'violeta'],
                 "Países": ['brasil', 'italia', 'alemanha', 'inglaterra', 'venezuela', 'espanha', 'islandia', 'Noruega',
                            'Portugal', 'Belgica']}
+# Listar salas
+ip = "localhost"
+rooms = {20001: True, 20002: True, 20003: True, 20004: True, 20005: False}
+manager_room(ip)
 
 # criando conexão tcp
-ip = "localhost"
+
 port = 20002
 address = (ip, port)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(address)
 server.listen(5)
-manager_room(ip)
 
 print("\n--------------------------------")
 print("|------JOGO DA FORCA-----------|")
@@ -187,7 +207,8 @@ try:
             time_submission = threading.Thread(target=submission_client, args=())
             time_submission.daemon = True
             time_submission.start()
-
+            #rooms[20002] = False
+            #print(rooms[20002], "lembrar de apagar")
         else:
             conec.send('n'.encode())
             new_client = threading.Thread(target=manager_client, args=(conec, word, cont_plays, catg))

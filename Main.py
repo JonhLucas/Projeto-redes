@@ -11,6 +11,7 @@ from principal import Ui_MainWindow
 
 class Sinais(QtCore.QObject):
     sinal = pyqtSignal()
+
     def __init__(self):
         QtCore.QObject.__init__(self)
 
@@ -65,6 +66,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     complete += 1
                     MainWindow.progressBar.setValue(complete)
 
+            #MainWindow.widget.hide()
+            #print("OOOOOOOOOOOOOOOOOOOOOOO")
             add = threading.Thread(target=addition)
             add.daemon = True
             add.start()
@@ -75,23 +78,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             MainWindow.Aguarde.show()
             MainWindow.Tema.setText(choice)
 
-        '''def change_background():
-            MainWindow.widget.setStyleSheet("background-color: #{};".format(random.randint(100000, 999999)))
-
-        sinal = Sinais()
-        sinal.sinal.connect(change_background)
-
-        def change_color():
-            while True:
-                time.sleep(1)
-                sinal.sinal.emit()
-
-        task = threading.Thread(target=change_color)
-        task.daemon = True
-        task.start()'''
         # conexões
         self.criar.clicked.connect(progress)
         self.criar.clicked.connect(transition)
+        self.Entrar.clicked.connect(progress)
+        #self.Entrar.clicked.connect(transition)
         self.Frutas.clicked.connect(lambda: choose_category("Frutas"))
         self.Cores.clicked.connect(lambda: choose_category("Cores"))
         self.Animais.clicked.connect(lambda: choose_category("Animais"))
@@ -99,37 +90,38 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def list_room(self, ip_address):
         try:
-            print("Entrou")
+            #print("Entrou")
             i_port = 20000
             i_address = (ip_address, i_port)
-            i_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            i_client: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             i_client.connect(i_address)
             rooms = i_client.recv(4096).decode().split('#')
             available = rooms[0].split("*")
             occupied = rooms[1].split("*")
-            #print(rooms)
-            for room in available:
-                print(room)
-                self.comboBox.addItem(room)
-            for room in occupied:
-                print(room)
-                self.comboBox_2.addItem(room)
-            print("Sair")
+            i = 0
+            while i < len(available) - 1:
+                #print(available[i])
+                self.comboBox.addItem(available[i])
+                i += 1
+            i = 0
+            #print("------------------------")
+            while i < len(occupied) - 1:
+                #print(occupied[i])
+                self.comboBox_2.addItem(occupied[i])
+                i += 1
+            #print("fim", type(i_client))
         except socket.error:
             print('erro na conexao')
+        return i_client
 
 
-def main(mw):
-    def create_room():
+def main(mw, room_socket):
+    def create_room(porta):
         def create_socket():
-            print(mw.comboBox.currentText())
-            try:
-                port = int(mw.lineEdit.text())
-                print("Endereço solicitado:", port)
-            except:
-                port = 20002
-                print('Endereço invalido. Encaminhando para:', port)
-
+            #choice = mw.comboBox.currentText()
+            print("escolhido", porta)
+            port = int(porta)
+            room_socket.send(porta.encode())
             try:
                 address = ("localhost", port)
                 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -203,10 +195,11 @@ def main(mw):
                             mw.label_7.setText(status[1])
                             mw.Palpites.setText(p[1][0:(p[1].find(']') + 1)])
 
-        tarefa_principal = threading.Thread(target=create_socket)
+        tarefa_principal = threading.Thread(target=create_socket, args=())
         tarefa_principal.start()
 
-    mw.criar.clicked.connect(create_room)
+    mw.criar.clicked.connect(lambda: create_room(mw.comboBox.currentText()))#lambda: choose_category("Frutas"
+    mw.Entrar.clicked.connect(lambda: create_room(mw.comboBox_2.currentText()))
 
 
 response = "Valor inicial"
@@ -217,7 +210,7 @@ if __name__ == "__main__":
     ip = "localhost"
     app = QtWidgets.QApplication(sys.argv)
     ui = MainWindow()
-    ui.list_room(ip)
+    c: socket.socket = ui.list_room(ip)
     ui.show()
-    main(ui)
+    main(ui, c)
     sys.exit(app.exec_())
