@@ -9,13 +9,6 @@ from PyQt5.QtCore import pyqtSignal
 from principal import Ui_MainWindow
 
 
-class Sinais(QtCore.QObject):
-    sinal = pyqtSignal()
-
-    def __init__(self):
-        QtCore.QObject.__init__(self)
-
-
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     """docstring for MainWindow"""
 
@@ -49,6 +42,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.progressBar.setValue(0)
         self.lineEdit_3.setEnabled(False)
+        self.lineEdit_3.setMaxLength(2)
 
         def transition():
             def end_waiting():
@@ -66,8 +60,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     complete += 1
                     MainWindow.progressBar.setValue(complete)
 
-            #MainWindow.widget.hide()
-            #print("OOOOOOOOOOOOOOOOOOOOOOO")
+            # MainWindow.widget.hide()
+            # print("OOOOOOOOOOOOOOOOOOOOOOO")
             add = threading.Thread(target=addition)
             add.daemon = True
             add.start()
@@ -82,7 +76,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.criar.clicked.connect(progress)
         self.criar.clicked.connect(transition)
         self.Entrar.clicked.connect(progress)
-        #self.Entrar.clicked.connect(transition)
         self.Frutas.clicked.connect(lambda: choose_category("Frutas"))
         self.Cores.clicked.connect(lambda: choose_category("Cores"))
         self.Animais.clicked.connect(lambda: choose_category("Animais"))
@@ -90,7 +83,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def list_room(self, ip_address):
         try:
-            #print("Entrou")
             i_port = 20000
             i_address = (ip_address, i_port)
             i_client: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -100,16 +92,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             occupied = rooms[1].split("*")
             i = 0
             while i < len(available) - 1:
-                #print(available[i])
+                # print(available[i])
                 self.comboBox.addItem(available[i])
                 i += 1
             i = 0
-            #print("------------------------")
+            # print("------------------------")
             while i < len(occupied) - 1:
-                #print(occupied[i])
+                # print(occupied[i])
                 self.comboBox_2.addItem(occupied[i])
                 i += 1
-            #print("fim", type(i_client))
+            # print("fim", type(i_client))
         except socket.error:
             print('erro na conexao')
         return i_client
@@ -118,10 +110,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 def main(mw, room_socket):
     def create_room(porta):
         def create_socket():
-            #choice = mw.comboBox.currentText()
             print("escolhido", porta)
             port = int(porta)
             room_socket.send(porta.encode())
+            time.sleep(1)
             try:
                 address = ("localhost", port)
                 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -198,7 +190,7 @@ def main(mw, room_socket):
         tarefa_principal = threading.Thread(target=create_socket, args=())
         tarefa_principal.start()
 
-    mw.criar.clicked.connect(lambda: create_room(mw.comboBox.currentText()))#lambda: choose_category("Frutas"
+    mw.criar.clicked.connect(lambda: create_room(mw.comboBox.currentText()))  # lambda: choose_category("Frutas"
     mw.Entrar.clicked.connect(lambda: create_room(mw.comboBox_2.currentText()))
 
 
