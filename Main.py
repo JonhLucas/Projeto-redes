@@ -42,7 +42,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.progressBar.setValue(0)
         self.lineEdit_3.setEnabled(False)
-        self.lineEdit_3.setMaxLength(2)
+        self.lineEdit_3.setMaxLength(1)
 
         def transition():
             def end_waiting():
@@ -60,8 +60,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     complete += 1
                     MainWindow.progressBar.setValue(complete)
 
-            # MainWindow.widget.hide()
-            # print("OOOOOOOOOOOOOOOOOOOOOOO")
             add = threading.Thread(target=addition)
             add.daemon = True
             add.start()
@@ -72,6 +70,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             MainWindow.Aguarde.show()
             MainWindow.Tema.setText(choice)
 
+        def send_letter():
+            global character
+            character = MainWindow.lineEdit_3.text()
+            MainWindow.lineEdit_3.setEnabled(False)
+            MainWindow.lineEdit_3.clear()
+            print(character)
+
+
         # conexões
         self.criar.clicked.connect(progress)
         self.criar.clicked.connect(transition)
@@ -80,6 +86,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.Cores.clicked.connect(lambda: choose_category("Cores"))
         self.Animais.clicked.connect(lambda: choose_category("Animais"))
         self.Paises.clicked.connect(lambda: choose_category("Países"))
+        self.pushButton_3.clicked.connect(send_letter)
 
     def list_room(self, ip_address):
         try:
@@ -110,6 +117,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 def main(mw, room_socket):
     def create_room(porta):
         def create_socket():
+            global character
             print("escolhido", porta)
             p = porta.split('#')
             port = int(p[0])
@@ -146,14 +154,23 @@ def main(mw, room_socket):
                 mw.Tema.setText(messenge_inicial[1])
                 while playing:
                     if keeper:
+                        #envio da letra
+                        mw.lineEdit_3.setEnabled(True)
                         print('leitura liberada')
-                        letter = input('Uma letra: ')
-                        letter = letter.encode()
-                        client.send(letter)
-                        print(mw.lineEdit_3.text())
+                        while character == '':
+                            time.sleep(1)
+                            print("digitada:", character, ".")
+                        #letter = input('Uma letra: ')
+                        #letter = letter.encode()
+                        #client.send(letter)
+                        print("caracter digitado:", character)
+                        client.send(character.encode())
+                        character = ''
+                        #Retorno do servidor
                         response = client.recv(4096).decode().split("#")
                         palavra = response[1].split(":")
                         status = response[0].split(":")
+                        #avaliação da próxima rodada
                         if 'Errado' in status[0]:
                             keeper = 0
                             mw.lineEdit_3.setEnabled(False)
@@ -169,7 +186,6 @@ def main(mw, room_socket):
                         response = client.recv(4096).decode()
                         if 'Sua vez' in response:
                             keeper = 1
-                            mw.lineEdit_3.setEnabled(True)
                         elif 'vitoria' in response:
                             playing = False
                             client.close()
@@ -197,6 +213,7 @@ def main(mw, room_socket):
 
 response = "Valor inicial"
 category = "inicial"
+character = ""
 if __name__ == "__main__":
     import sys
 
