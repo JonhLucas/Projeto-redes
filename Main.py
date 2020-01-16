@@ -111,7 +111,8 @@ def main(mw, room_socket):
     def create_room(porta):
         def create_socket():
             print("escolhido", porta)
-            port = int(porta)
+            p = porta.split('#')
+            port = int(p[0])
             room_socket.send(porta.encode())
             time.sleep(1)
             try:
@@ -190,8 +191,8 @@ def main(mw, room_socket):
         tarefa_principal = threading.Thread(target=create_socket, args=())
         tarefa_principal.start()
 
-    mw.criar.clicked.connect(lambda: create_room(mw.comboBox.currentText()))  # lambda: choose_category("Frutas"
-    mw.Entrar.clicked.connect(lambda: create_room(mw.comboBox_2.currentText()))
+    mw.criar.clicked.connect(lambda: create_room(mw.comboBox.currentText()+"#criar"))  # lambda: choose_category("Frutas"
+    mw.Entrar.clicked.connect(lambda: create_room(mw.comboBox_2.currentText()+"#entrar"))
 
 
 response = "Valor inicial"

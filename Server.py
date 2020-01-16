@@ -26,15 +26,18 @@ def manager_room():
             r = ""
             answer = i_conec.recv(4096).decode()
             print("Devolvido:", answer)
-            rooms[int(answer)] = False
+            ans = answer.split('#')
+            rooms[int(ans[0])] = False
+            if 'criar' in ans[1]:
+                def create_room():
+                    room = Room(int(ans[0]))
+                    print("------------------sala criada")
 
-            def create_room():
-                room = Room(int(answer))
-                print("------------------sala criada")
-
-            task = threading.Thread(target=create_room, args=())
-            task.start()
-            print('Sala criada', answer)
+                task = threading.Thread(target=create_room, args=())
+                task.start()
+                print('Sala criada', answer)
+            elif 'entrar' in ans[1]:
+                print('Entrou na sala:', answer)
             i_conec.close()
     except socket.error:
         print("Erro na conexao")
