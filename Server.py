@@ -25,13 +25,11 @@ def manager_room():
             i_conec.send(r.encode())
             r = ""
             answer = i_conec.recv(4096).decode()
-            print("Devolvido:", answer)
             ans = answer.split('#')
             rooms[int(ans[0])] = False
             if 'criar' in ans[1]:
                 def create_room():
                     room = Room(int(ans[0]))
-                    print("------------------sala criada")
 
                 task = threading.Thread(target=create_room, args=())
                 task.start()

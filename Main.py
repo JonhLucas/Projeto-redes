@@ -4,9 +4,8 @@ import threading
 import time
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import pyqtSignal
 
-from principal import Ui_MainWindow
+from MainWindowGui import Ui_MainWindow
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -19,9 +18,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "MainWindow", None, -1))
-        self.label.setText(_translate("MainWindow", "Criar nova sala:"))
+        self.label_9.setText(_translate("MainWindow", "Qual é a palavra?"))
+        self.label.setText(_translate("MainWindow", "Ativar nova sala:"))
         self.criar.setText(_translate("MainWindow", "Criar"))
-        self.label_2.setText(_translate("MainWindow", "Digite o código da sala que deseja entrar"))
+        self.label_2.setText(_translate("MainWindow", "Escolher uma sala:"))
         self.Entrar.setText(_translate("MainWindow", "entrar"))
         self.label_8.setText(_translate("MainWindow", "Resultado:"))
         self.resultado.setText(_translate("MainWindow", "TextLabel"))
@@ -29,7 +29,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton_3.setText(_translate("MainWindow", "Palpite"))
         self.label_10.setText(_translate("MainWindow", "Letras utilizadas:"))
         self.Palpites.setText(_translate("MainWindow", "[]"))
-        self.label_11.setText(_translate("MainWindow", "Palavra:"))
+        self.label_11.setText(_translate("MainWindow", "Status:"))
         self.label_7.setText(_translate("MainWindow", "Palavra"))
         self.label_5.setText(_translate("MainWindow", "Tema:"))
         self.Tema.setText(_translate("MainWindow", "Variavel"))
@@ -39,6 +39,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.Paises.setText(_translate("MainWindow", "Países"))
         self.label_4.setText(_translate("MainWindow", "Escolha uma categoria"))
         self.label_3.setText(_translate("MainWindow", "Aguarde"))
+        self.label_12.setText(_translate("MainWindow", "FIM DO JOGO"))
+        self.label_13.setText(_translate("MainWindow", "Bem vindo ao"))
 
         self.progressBar.setValue(0)
         self.lineEdit_3.setEnabled(False)
@@ -99,16 +101,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             occupied = rooms[1].split("*")
             i = 0
             while i < len(available) - 1:
-                # print(available[i])
                 self.comboBox.addItem(available[i])
                 i += 1
             i = 0
-            # print("------------------------")
             while i < len(occupied) - 1:
-                # print(occupied[i])
                 self.comboBox_2.addItem(occupied[i])
                 i += 1
-            # print("fim", type(i_client))
         except socket.error:
             print('erro na conexao')
         return i_client
@@ -133,7 +131,6 @@ def main(mw, room_socket):
             keeper = 0  # condição para leitura de dados
             guesses = []
             print("Cliente ativo, fazendo requisição\n")
-            # try:
             while playing:
                 print('inicio de jogo')
                 control = client.recv(2)
@@ -159,10 +156,6 @@ def main(mw, room_socket):
                         print('leitura liberada')
                         while character == '':
                             time.sleep(1)
-                            print("digitada:", character, ".")
-                        #letter = input('Uma letra: ')
-                        #letter = letter.encode()
-                        #client.send(letter)
                         print("caracter digitado:", character)
                         client.send(character.encode())
                         character = ''
@@ -203,7 +196,7 @@ def main(mw, room_socket):
                             p = palavra[1].split(":")
                             mw.label_7.setText(status[1])
                             mw.Palpites.setText(p[1][0:(p[1].find(']') + 1)])
-
+                            
         tarefa_principal = threading.Thread(target=create_socket, args=())
         tarefa_principal.start()
 

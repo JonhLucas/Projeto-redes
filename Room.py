@@ -2,6 +2,7 @@ import socket
 import threading
 import time
 import random
+from unicodedata import normalize
 
 
 class Room:
@@ -20,35 +21,37 @@ class Room:
         self.guesses = []
         self.word_clients = []
         self.words_Server = {
-            "Frutas": ['uva', 'maçã', 'laranja', 'banana', 'pera', 'mamão', 'abacate', 'abacaxi', 'melão', 'cereja',
-                       'tangerina'],
-            "Animais": ['macaco', 'gato', 'cachorro', 'galinha', 'cobra', 'tartaruga', 'cabra', 'boi', 'vaca',
-                        'escorpião', 'sapo'],
+            "Frutas": ['uva', 'coco', 'laranja', 'banana', 'pera', 'carambola', 'abacate', 'abacaxi', 'amora', 'cereja',
+                       'tangerina', 'goiaba', 'acerola', 'ameixa', 'caju', 'Cacau', 'Damasco', 'Figo', 'manga'],
+            "Animais": ['macaco', 'gato', 'cachorro', 'galinha', 'cobra', 'tartaruga', 'cabra', 'boi', 'vaca', 'sapo',
+                        'Camelo', 'Morcego', 'elefante'],
             "Cores": ['azul', 'verde', 'vermelho', 'preto', 'amarelo', 'rosa', 'marrom', 'roxo', 'branco', 'cinza',
-                      'lilas', 'violeta'],
-            "Países": ['brasil', 'italia', 'alemanha', 'inglaterra', 'venezuela', 'espanha', 'islandia', 'Noruega',
+                      'lilas', 'violeta', 'Esmeralda', 'Magenta', 'Jade'],
+            "Países": ['Brasil', 'Italia', 'Alemanha', 'Inglaterra', 'Croacia', 'Hungria', 'Japao', 'venezuela',
+                       'Espanha', 'Islandia', 'Noruega',
                        'Portugal', 'Belgica']}
         self.word = ""
-        print("iniciada")
         self.run()
 
     def submission_client(self):
         while self.cont_plays < 2:
-            print(self.cont_plays)
-            time.sleep(10)
+            time.sleep(4)
         self.ready = True
-        self.submission = False
         print("O jogo pode começar")
+        while self.cont_plays < 3:
+            print(self.cont_plays)
+            time.sleep(4)
+        self.submission = False
 
     # Função responsavel por chegar se a letra está contida na palavra
-
     def check_tentative(self, letter):
+
         have = False
         faul_letter = 0
-
         for i in range(len(self.word)):
-            if self.word[i] == letter:
-                self.word_clients[i] = letter
+
+            if self.word[i].lower() == letter.lower():
+                self.word_clients[i] = letter.lower()
                 have = True
             if self.word_clients[i] == '_':
                 faul_letter = faul_letter + 1
@@ -78,8 +81,11 @@ class Room:
                 letter = conec.recv(2)
                 letter = letter.decode()
 
+                letter = normalize('NFKD', letter).encode('ASCII', 'ignore').decode('ASCII')
                 print("Letra escolhida:", letter)
-                self.guesses.append(letter)
+
+                if letter not in self.guesses:
+                    self.guesses.append(letter.lower())
                 print(str(self.guesses))
 
                 right, fault_qtd = self.check_tentative(letter)
@@ -168,7 +174,7 @@ class Room:
                     new_client = threading.Thread(target=self.manager_client,
                                                   args=(conec, self.word, self.cont_plays, catg))
                     new_client.start()
-            print("fechando")
+            print("Submissão de clientes encerrada")
             server.close()
         except:
             server.close()
